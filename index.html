@@ -38,11 +38,13 @@
         }
         
         .filter-group label { display: block; font-size: 11px; font-weight: 700; color: #444; margin-bottom: 5px; text-transform: uppercase; }
+        
         select { 
             width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; 
             background-color: white; cursor: pointer; font-size: 14px; outline: none;
+            box-sizing: border-box;
         }
-        
+
         .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
         
         .card { 
@@ -64,7 +66,6 @@
             font-size: 10px; padding: 6px 14px; border-radius: 20px; 
             color: white; font-weight: 800; text-transform: uppercase;
             display: inline-block; margin-bottom: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .linha-container {
@@ -72,30 +73,29 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
-        .linha-label { font-size: 9px; text-transform: uppercase; font-weight: 800; color: #bbb; margin-bottom: 2px; }
-
         .linha-badge { 
             background: var(--primary); color: white; min-width: 36px; height: 36px; 
             display: flex; align-items: center; justify-content: center; 
             border-radius: 50%; font-weight: bold; font-size: 13px;
-            box-shadow: 0 3px 6px rgba(199, 0, 57, 0.3);
         }
 
         .gd-info {
             font-size: 9px; font-weight: 800; color: #777;
             text-transform: uppercase; margin-top: 6px; text-align: center;
-            line-height: 1; border-top: 1px solid #eee; padding-top: 2px;
+            border-top: 1px solid #eee; padding-top: 2px;
         }
         
         .rep-name { font-size: 20px; font-weight: 800; color: #222; margin: 10px 0 5px 0; display: block; }
         
-        .prod-label { font-size: 10px; color: #999; text-transform: uppercase; margin-top: 18px; display: block; font-weight: 800; letter-spacing: 0.8px; }
+        .prod-label { font-size: 10px; color: #999; text-transform: uppercase; margin-top: 18px; display: block; font-weight: 800; }
         
         .prod-box {
             background-color: #fcfcfc; border: 1px solid #f0f0f0; border-radius: 8px;
             padding: 15px; margin-top: 6px; min-height: 110px;
         }
-        .prod-list { font-size: 12px; color: #555; line-height: 1.6; text-align: left; font-weight: 500; }
+        .prod-list { font-size: 12px; color: #555; line-height: 1.6; text-align: left; }
+        
+        .no-results { grid-column: 1 / -1; text-align: center; padding: 40px; color: white; font-weight: bold; display: none; }
     </style>
 </head>
 <body>
@@ -124,7 +124,7 @@
 
         <div class="filter-group">
             <label>Nº Linha</label>
-            <select id="fLinha" onchange="filterCards()">
+            <select id="fLinha" onchange="updateProductList(); filterCards();">
                 <option value="todas">Todas as Linhas</option>
                 <option value="1">Linha 1</option>
                 <option value="2">Linha 2</option>
@@ -137,6 +137,13 @@
         </div>
 
         <div class="filter-group">
+            <label>Produto</label>
+            <select id="fProduto" onchange="filterCards()">
+                <option value="todos">Todos os Produtos</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
             <label>Representante</label>
             <select id="fRep" onchange="filterCards()">
                 <option value="todos">Todos os Representantes</option>
@@ -145,6 +152,7 @@
     </div>
 
     <div class="card-grid" id="cardGrid"></div>
+    <div id="noResults" class="no-results">Nenhum resultado encontrado.</div>
 </div>
 
 <script>
@@ -163,17 +171,9 @@
     };
 
     const coresSetores = {
-        "SETOR SOBRAL": "#E67E22",
-        "13 DE MAIO - CENTRO": "#2980B9",
-        "ALDEOTA GÊNESIS": "#8E44AD",
-        "ALDEOTA SÃO MATEUS": "#27AE60",
-        "CIDADE DOS FUNCIONÁRIOS": "#C0392B",
-        "JUAZEIRO": "#795548",
-        "IGUATU": "#16A085",
-        "PARANGABA": "#D81B60",
-        "MARACANAU": "#3F51B5",
-        "BEZERRA": "#607D8B",
-        "CAUCAIA": "#2C3E50"
+        "SETOR SOBRAL": "#E67E22", "13 DE MAIO - CENTRO": "#2980B9", "ALDEOTA GÊNESIS": "#8E44AD",
+        "ALDEOTA SÃO MATEUS": "#27AE60", "CIDADE DOS FUNCIONÁRIOS": "#C0392B", "JUAZEIRO": "#795548",
+        "IGUATU": "#16A085", "PARANGABA": "#D81B60", "MARACANAU": "#3F51B5", "BEZERRA": "#607D8B", "CAUCAIA": "#2C3E50"
     };
 
     const bancoDados = [
@@ -205,28 +205,62 @@
                 if(rep !== "VAGO") {
                     todosReps.add(rep);
                     html += `
-                        <div class="card" data-setor="${item.setor}" data-linha="${linha}" data-rep="${rep}">
+                        <div class="card" 
+                             data-setor="${item.setor}" 
+                             data-linha="${linha}" 
+                             data-rep="${rep}" 
+                             data-produtos="${produtosPorLinha[linha].toLowerCase()}">
                             <span class="setor-tag" style="background-color: ${corSetor}">${item.setor}</span>
                             <div class="linha-container">
-                                <span class="linha-label">Linha</span>
                                 <div class="linha-badge">${linha}</div>
                                 <div class="gd-info">GD ${gdsPorLinha[linha]}</div>
                             </div>
                             <span class="rep-name">${rep}</span>
-                            <span class="prod-label">Portfólio de Produtos</span>
-                            <div class="prod-box">
-                                <div class="prod-list">${produtosPorLinha[linha]}</div>
-                            </div>
+                            <span class="prod-label">Portfólio</span>
+                            <div class="prod-box"><div class="prod-list">${produtosPorLinha[linha]}</div></div>
                         </div>`;
                 }
             });
         });
-
         grid.innerHTML = html;
+        
+        // Popular Representantes
         Array.from(todosReps).sort().forEach(rep => {
             const opt = document.createElement('option');
             opt.value = rep; opt.innerHTML = rep;
             selectRep.appendChild(opt);
+        });
+
+        // Popular Produtos Inicialmente
+        updateProductList();
+    }
+
+    function updateProductList() {
+        const linhaSel = document.getElementById('fLinha').value;
+        const selectProd = document.getElementById('fProduto');
+        
+        // Guardar o valor atual para tentar manter a seleção se possível
+        const currentSelection = selectProd.value;
+        
+        selectProd.innerHTML = '<option value="todos">Todos os Produtos</option>';
+        
+        let listaProdutos = [];
+        if (linhaSel === "todas") {
+            Object.values(produtosPorLinha).forEach(p => {
+                listaProdutos.push(...p.split(', '));
+            });
+        } else {
+            listaProdutos = produtosPorLinha[linhaSel].split(', ');
+        }
+
+        // Remover duplicatas e ordenar
+        const produtosUnicos = [...new Set(listaProdutos)].sort();
+
+        produtosUnicos.forEach(prod => {
+            const opt = document.createElement('option');
+            opt.value = prod.toLowerCase();
+            opt.innerHTML = prod;
+            selectProd.appendChild(opt);
         });
     }
 
@@ -234,24 +268,35 @@
         const sSetor = document.getElementById('fSetor').value;
         const sLinha = document.getElementById('fLinha').value;
         const sRep = document.getElementById('fRep').value;
-        const cards = document.querySelectorAll('.card');
+        const sProd = document.getElementById('fProduto').value.toLowerCase();
         
+        const cards = document.querySelectorAll('.card');
+        let total = 0;
+
         cards.forEach(card => {
             const mSetor = sSetor === "todos" || card.dataset.setor === sSetor;
             const mLinha = sLinha === "todas" || card.dataset.linha === sLinha;
             const mRep = sRep === "todos" || card.dataset.rep === sRep;
-            if (mSetor && mLinha && mRep) {
+            
+            // Verifica se o produto selecionado está na lista de produtos do card (data-produtos)
+            // Usamos uma verificação mais rigorosa para evitar match parcial indevido
+            const listaCard = card.dataset.produtos.split(', ');
+            const mProd = sProd === "todos" || card.dataset.produtos.includes(sProd);
+
+            if (mSetor && mLinha && mRep && mProd) {
                 card.style.display = "block";
+                total++;
             } else {
                 card.style.display = "none";
             }
         });
+
+        document.getElementById('noResults').style.display = total === 0 ? "block" : "none";
     }
 
-    init();
+    // Inicializar o sistema
+    window.onload = init;
 </script>
 </body>
 </html>
-
-Desenvolvido por Bruno Nogueira 
-
+Desenvolvido por Bruno N. Medeiros
