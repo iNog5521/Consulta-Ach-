@@ -46,7 +46,6 @@
             box-sizing: border-box;
         }
 
-        /* Estilo do Botão Limpar */
         .btn-limpar {
             background-color: #666;
             color: white;
@@ -141,6 +140,7 @@
             <label>Setor</label>
             <select id="fSetor" onchange="filterCards()">
                 <option value="">Selecione o Setor</option>
+                <option value="todos">Todos os Setores</option>
                 <option value="SETOR SOBRAL">SETOR SOBRAL</option>
                 <option value="13 DE MAIO - CENTRO">13 DE MAIO - CENTRO</option>
                 <option value="ALDEOTA GÊNESIS">ALDEOTA GÊNESIS</option>
@@ -159,6 +159,7 @@
             <label>Nº Linha</label>
             <select id="fLinha" onchange="updateProductList(); filterCards();">
                 <option value="">Selecione a Linha</option>
+                <option value="todos">Todas as Linhas</option>
                 <option value="1">Linha 1</option>
                 <option value="2">Linha 2</option>
                 <option value="3">Linha 3</option>
@@ -173,6 +174,7 @@
             <label>Produto</label>
             <select id="fProduto" onchange="filterCards()">
                 <option value="">Selecione o Produto</option>
+                <option value="todos">Todos os Produtos</option>
             </select>
         </div>
 
@@ -180,6 +182,7 @@
             <label>Representante</label>
             <select id="fRep" onchange="filterCards()">
                 <option value="">Selecione o Representante</option>
+                <option value="todos">Todos os Representantes</option>
             </select>
         </div>
 
@@ -274,22 +277,21 @@
         updateProductList();
     }
 
-    // NOVA FUNÇÃO PARA LIMPAR TUDO
     function limparFiltros() {
         document.getElementById('fSetor').value = "";
         document.getElementById('fLinha').value = "";
         document.getElementById('fRep').value = "";
-        updateProductList(); // Reseta os produtos também
-        filterCards(); // Dispara o filtro para esconder os cards e mostrar msg inicial
+        updateProductList();
+        filterCards();
     }
 
     function updateProductList() {
         const linhaSel = document.getElementById('fLinha').value;
         const selectProd = document.getElementById('fProduto');
-        selectProd.innerHTML = '<option value="">Selecione o Produto</option>';
+        selectProd.innerHTML = '<option value="">Selecione o Produto</option><option value="todos">Todos os Produtos</option>';
         
         let listaProdutos = [];
-        if (linhaSel === "") {
+        if (linhaSel === "" || linhaSel === "todos") {
             Object.values(produtosPorLinha).forEach(p => { listaProdutos.push(...p.split(', ')); });
         } else {
             listaProdutos = produtosPorLinha[linhaSel].split(', ');
@@ -314,6 +316,7 @@
         const msgInicial = document.getElementById('msgInicial');
         const noResults = document.getElementById('noResults');
         
+        // Algum filtro está ativo se algum valor for diferente de vazio ("")
         const algumFiltroAtivo = sSetor !== "" || sLinha !== "" || sRep !== "" || sProd !== "";
 
         if (!algumFiltroAtivo) {
@@ -327,10 +330,10 @@
         let totalVisivel = 0;
 
         cards.forEach(card => {
-            const mSetor = sSetor === "" || card.dataset.setor === sSetor;
-            const mLinha = sLinha === "" || card.dataset.linha === sLinha;
-            const mRep = sRep === "" || card.dataset.rep === sRep;
-            const mProd = sProd === "" || card.dataset.produtos.includes(sProd);
+            const mSetor = sSetor === "todos" || sSetor === "" || card.dataset.setor === sSetor;
+            const mLinha = sLinha === "todos" || sLinha === "" || card.dataset.linha === sLinha;
+            const mRep = sRep === "todos" || sRep === "" || card.dataset.rep === sRep;
+            const mProd = sProd === "todos" || sProd === "" || card.dataset.produtos.includes(sProd);
 
             if (mSetor && mLinha && mRep && mProd) {
                 card.style.display = "block";
