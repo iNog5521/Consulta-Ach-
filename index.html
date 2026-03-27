@@ -128,6 +128,30 @@
         .prod-box { background-color: #fcfcfc; border: 1px solid #f0f0f0; border-radius: 8px; padding: 15px; margin-top: 6px; min-height: 110px; }
         .prod-list { font-size: 12px; color: #555; line-height: 1.6; text-align: left; }
         .no-results { grid-column: 1 / -1; text-align: center; padding: 40px; color: white; font-weight: bold; display: none; }
+
+        /* ── WhatsApp ── */
+        .whatsapp-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+            text-decoration: none;
+            color: #128C7E;
+            font-size: 13px;
+            font-weight: 700;
+            transition: opacity 0.2s;
+        }
+        .whatsapp-link:hover { opacity: 0.75; }
+        .whatsapp-link svg { flex-shrink: 0; }
+        .whatsapp-placeholder {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+            color: #bbb;
+            font-size: 13px;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -218,21 +242,141 @@
         "IGUATU": "#16A085", "PARANGABA": "#D81B60", "MARACANAU": "#3F51B5", "BEZERRA": "#607D8B", "CAUCAIA": "#2C3E50"
     };
 
+    // Cada representante: { nome, tel } — tel em formato internacional sem '+' (5588..., 5585...)
+    // tel: null = placeholder '—'
     const bancoDados = [
-        {setor: "SETOR SOBRAL", representantes: ["THIAGO - AMSTERDAM", "PENÉLOPE - ALEX", "YGOR - MARCOS", "MARCIO - ANTÔNIO", "IZAC - LUENE", "FELIPE - JUNIN", "MAYCON"]},
-        {setor: "13 DE MAIO - CENTRO", representantes: ["DÉBORA BEZERRA", "MARINA BRAIDE", "CAMILA", "ÁTILA", "DANIELLE", "LARISSA", "LOUISE - KASSIO"]},
-        {setor: "ALDEOTA GÊNESIS", representantes: ["KARINE ROLENBERG", "PATRIZIA", "JULIAN", "ISADORA", "MATEUS PITAYA", "PAULO JAMES", "GIRLIANE"]},
-        {setor: "ALDEOTA SÃO MATEUS", representantes: ["MILTON JR", "NOGUEIRA", "MARCELA", "ANDREA", "JÉSSICA DIAS", "PAULO VICTOR", "MARIA CLARA"]},
-        {setor: "CIDADE DOS FUNCIONÁRIOS", representantes: ["RAQUEL", "DÉBORA MARTINS", "BRUNO", "PAULO GUEDES", "CAVALCANTE", "LUCAS", "KARINA"]},
-        {setor: "JUAZEIRO", representantes: ["GERVANDIO - JOICE", "PAULO - HUDSON", "TAINÁ - CLAUDEMIR", "PRISCILA - ITALO", "THAMIRES - YAGO", "LICIA - RAVENA", "GREUCY"]},
-        {setor: "IGUATU", representantes: ["NATÁLIA", "PAULO DECKSON", "FELIPE", "JOÃO", "RAYAN", "NARA", "MURILO"]},
-        {setor: "PARANGABA", representantes: ["MASSÍLIA", "NATÁLIA", "MICHELLY", "LUANA", "MARLY", "MARCOS", "GABRIEL"]},
-        {setor: "MARACANAU", representantes: ["RENATA", "VINICIUS", "ELIONARDO", "BARBOSA", "FERNANDO", "LOIOLA", "NONATO"]},
-        {setor: "BEZERRA", representantes: ["DÉBORA QUEIROZ", "MARINA ARRAES", "SAMANTHA", "CARINE BORGES", "FERNANDA", "BRITO", "ALEXANDRINO"]},
-        {setor: "CAUCAIA", representantes: ["DARLENE", "GUSTAVO", "LUCAS", "THIAGO BELCHIOR", "VAGO", "MÁRCIO ", "ALEXANDRINO"]}
+        {setor: "SETOR SOBRAL", representantes: [
+            {nome: "THIAGO DIOGO",      tel: "5588993151538"},
+            {nome: "PENÉLOPE",          tel: "5588992218142"},
+            {nome: "YGOR",              tel: "5588981376270"},
+            {nome: "MARCIO",            tel: "5585981209883"},
+            {nome: "IZAC",              tel: "5588981321789"},
+            {nome: "FELIPE",            tel: "5588981373350"},
+            {nome: "MAYCON",            tel: "5588981196967"}
+        ]},
+        {setor: "SETOR SOBRAL", representantes: [
+            {nome: "AMSTERDAM",         tel: "5588997130299"},
+            {nome: "ALEXSON",           tel: "5588981140885"},
+            {nome: "MARCOS",            tel: "5588981480508"},
+            {nome: "ANTÔNIO",           tel: "5588981230454"},
+            {nome: "LUENE",             tel: "5588981092049"},
+            {nome: "JUNIN",             tel: "5588981201734"},
+            {nome: "MAYCON",            tel: null}
+        ]},
+        {setor: "13 DE MAIO - CENTRO", representantes: [
+            {nome: "DÉBORA BEZERRA",    tel: "5585981610496"},
+            {nome: "MARINA BRAIDE",     tel: "5585981028666"},
+            {nome: "CAMILA",            tel: "5585981610416"},
+            {nome: "ÁTILA",             tel: "5585981148416"},
+            {nome: "DANIELLE",          tel: "5585981610831"},
+            {nome: "LARYSSA",           tel: "5585981520029"},
+            {nome: "LOUISE - KASSIO",   tel: "5585981164385"}
+        ]},
+        {setor: "ALDEOTA GÊNESIS", representantes: [
+            {nome: "KARINE ROLENBERG",  tel: "5585981614076"},
+            {nome: "PATRIZIA",          tel: "5585981466162"},
+            {nome: "JULIAN",            tel: "5585981181876"},
+            {nome: "ISADORA",           tel: "5585981481729"},
+            {nome: "MATEUS PAULO",      tel: "5585981586753"},
+            {nome: "PAULO JAMES",       tel: "5585981415777"},
+            {nome: "GIRLIANE",          tel: "5585981587192"}
+        ]},
+        {setor: "ALDEOTA SÃO MATEUS", representantes: [
+            {nome: "MILTON JR",         tel: "5585981589337"},
+            {nome: "NOGUEIRA",          tel: "5585981610874"},
+            {nome: "MARCELA",           tel: "5585981259320"},
+            {nome: "ANDREA",            tel: "5585982128416"},
+            {nome: "JÉSSICA DIAS",      tel: "5585981063329"},
+            {nome: "PAULO VICTOR",      tel: "5585981855940"},
+            {nome: "MARIA CLARA",       tel: "5585982118019"}
+        ]},
+        {setor: "CIDADE DOS FUNCIONÁRIOS", representantes: [
+            {nome: "RAQUEL",            tel: "5585987811623"},
+            {nome: "DÉBORA MARTINS",    tel: "5585981973017"},
+            {nome: "BRUNO",             tel: "5585999893137"},
+            {nome: "PAULO GUEDES",      tel: "5585988620686"},
+            {nome: "CAVALCANTE",        tel: "5585981610377"},
+            {nome: "LUCAS",             tel: "5585981586941"},
+            {nome: "KARINA ARRUDA",     tel: "5585981485079"}
+        ]},
+        {setor: "JUAZEIRO", representantes: [
+            {nome: "GERVANDIO",         tel: "5585997662919"},
+            {nome: "PAULO GURGEL",      tel: "5588981410687"},
+            {nome: "TAYNA",             tel: "5585997101432"},
+            {nome: "PRISCILA",          tel: "5588981107767"},
+            {nome: "THAMIRES",          tel: "5588993097620"},
+            {nome: "LICIA",             tel: "5588981801100"},
+            {nome: "GREUCY",            tel: "5588981105769"}
+        ]},
+        {setor: "JUAZEIRO", representantes: [
+            {nome: "JOICE",             tel: "5588981164637"},
+            {nome: "HUDSON",            tel: "5588992076949"},
+            {nome: "CLAUDEMIR",         tel: "5585999658506"},
+            {nome: "ITALO",             tel: "5588997664667"},
+            {nome: "YAGO",              tel: "5588981178319"},
+            {nome: "RAVENA",            tel: "5588981147093"},
+            {nome: "GREUCY",            tel: "5588981105769"}
+        ]},
+        {setor: "IGUATU", representantes: [
+            {nome: "NATÁLIA",           tel: "5588981112242"},
+            {nome: "PAULO DECKSON",     tel: "5588999279862"},
+            {nome: "FELIPE FERNANDES",  tel: "5585981053872"},
+            {nome: "JOÃO",              tel: "5588996052930"},
+            {nome: "RAYAN",             tel: "5588981178319"},
+            {nome: "NARA",              tel: "5588981249435"},
+            {nome: "MAURILIO",          tel: "5588981416079"}
+        ]},
+        {setor: "PARANGABA", representantes: [
+            {nome: "MASSILIA",          tel: "5585981563956"},
+            {nome: "NATALIA",           tel: "5585981974766"},
+            {nome: "MICHELLY",          tel: "5585982126036"},
+            {nome: "LUANA",             tel: "5585982161477"},
+            {nome: "MARLY",             tel: "5585999881189"},
+            {nome: "MARCOS",            tel: "5585981589294"},
+            {nome: "GABRIEL",           tel: "5585981677714"}
+        ]},
+        {setor: "MARACANAU", representantes: [
+            {nome: "RENATA",            tel: "5585981620689"},
+            {nome: "VINICIUS",          tel: "5585981563120"},
+            {nome: "ELIONARDO",         tel: "5585981198988"},
+            {nome: "BARBOSA",           tel: "5585981620195"},
+            {nome: "FERNANDO",          tel: "5585981263434"},
+            {nome: "LOIOLA",            tel: "5585982030961"},
+            {nome: "NONATO",            tel: "5585992604922"}
+        ]},
+        {setor: "BEZERRA", representantes: [
+            {nome: "DEBORAH QUEIROZ",   tel: "5585981365328"},
+            {nome: "MARINA",            tel: "5585981165897"},
+            {nome: "SAMANTHA",          tel: "5585996555868"},
+            {nome: "CARINE BORGES",     tel: "5585981398856"},
+            {nome: "FERNANDA",          tel: "5585981589321"},
+            {nome: "BRITO",             tel: "5585981816064"},
+            {nome: "ALEXANDRINO",       tel: "5585997455033"}
+        ]},
+        {setor: "CAUCAIA", representantes: [
+            {nome: "DARLENE",           tel: null},
+            {nome: "GUSTAVO AUGUSTO",   tel: "5585981657696"},
+            {nome: "LUCAS NEVES",       tel: "5585981091103"},
+            {nome: "THIAGO BELCHIOR",   tel: "5585982179332"},
+            {nome: "DEBORA",            tel: "5585981650223"},
+            {nome: "ANTONIO MARCIO",    tel: "5585981620469"},
+            {nome: "ALEXANDRINO",       tel: "5585997455033"}
+        ]}
     ];
 
     const linhasMap = ["1", "2", "3", "4", "5", "6", "BIO"];
+
+    const whatsappIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 32 32" fill="#25D366">
+        <path d="M16 0C7.163 0 0 7.163 0 16c0 2.824.737 5.476 2.027 7.774L0 32l8.432-2.01A15.93 15.93 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.333a13.27 13.27 0 01-6.771-1.852l-.485-.289-5.007 1.194 1.228-4.878-.317-.5A13.267 13.267 0 012.667 16C2.667 8.636 8.636 2.667 16 2.667S29.333 8.636 29.333 16 23.364 29.333 16 29.333zm7.273-9.846c-.398-.199-2.355-1.162-2.72-1.295-.366-.133-.632-.199-.898.199-.266.398-1.031 1.295-1.264 1.561-.233.266-.465.299-.863.1-.398-.199-1.681-.619-3.202-1.977-1.183-1.057-1.981-2.362-2.214-2.76-.233-.398-.025-.613.175-.811.18-.179.398-.465.598-.698.199-.233.266-.398.398-.664.133-.266.066-.499-.033-.698-.1-.199-.898-2.164-1.23-2.962-.325-.777-.655-.672-.898-.684l-.765-.013c-.266 0-.698.1-1.064.499-.366.398-1.396 1.362-1.396 3.322s1.43 3.853 1.628 4.119c.199.266 2.814 4.296 6.818 6.025.953.411 1.696.657 2.275.841.956.304 1.826.261 2.514.158.767-.114 2.355-.963 2.688-1.893.333-.93.333-1.727.233-1.893-.1-.166-.366-.266-.765-.465z"/>
+    </svg>`;
+
+    function buildWhatsapp(tel) {
+        if (!tel) {
+            return `<span class="whatsapp-placeholder">${whatsappIcon.replace('#25D366','#ccc')} —</span>`;
+        }
+        const formatted = tel.replace('55', '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        return `<a class="whatsapp-link" href="https://wa.me/${tel}" target="_blank" rel="noopener">${whatsappIcon} ${formatted}</a>`;
+    }
 
     function init() {
         const grid = document.getElementById('cardGrid');
@@ -245,13 +389,13 @@
             const corSetor = coresSetores[item.setor] || "#666";
             item.representantes.forEach((rep, index) => {
                 const linha = linhasMap[index];
-                if(rep !== "VAGO") {
-                    todosReps.add(rep);
+                if (rep.nome !== "VAGO") {
+                    todosReps.add(rep.nome);
                     html += `
                         <div class="card" 
                              data-setor="${item.setor}" 
                              data-linha="${linha}" 
-                             data-rep="${rep}" 
+                             data-rep="${rep.nome}" 
                              data-produtos="${produtosPorLinha[linha].toLowerCase()}">
                             <span class="setor-tag" style="background-color: ${corSetor}">${item.setor}</span>
                             <div class="linha-container">
@@ -259,7 +403,8 @@
                                 <div class="linha-badge">${linha}</div>
                                 <div class="gd-info">GD ${gdsPorLinha[linha]}</div>
                             </div>
-                            <span class="rep-name">${rep}</span>
+                            <span class="rep-name">${rep.nome}</span>
+                            ${buildWhatsapp(rep.tel)}
                             <span class="prod-label">Portfólio</span>
                             <div class="prod-box"><div class="prod-list">${produtosPorLinha[linha]}</div></div>
                         </div>`;
@@ -316,7 +461,6 @@
         const msgInicial = document.getElementById('msgInicial');
         const noResults = document.getElementById('noResults');
         
-        // Algum filtro está ativo se algum valor for diferente de vazio ("")
         const algumFiltroAtivo = sSetor !== "" || sLinha !== "" || sRep !== "" || sProd !== "";
 
         if (!algumFiltroAtivo) {
@@ -350,6 +494,4 @@
 </script>
 </body>
 </html>
-Criado por Bruno N. Medeiros
-
-
+<!-- Criado por Bruno N. Medeiros -->
